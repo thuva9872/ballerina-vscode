@@ -1013,6 +1013,18 @@ export type BISearchResponse = {
     categories: Category[];
 }
 
+export type LibraryCatalogSource = "ALL" | "BALLERINA" | "ORGANIZATION" | "COMMUNITY";
+
+export type BILibraryCatalogRequest = {
+    filePath: string;
+    source?: LibraryCatalogSource;
+    queryMap?: SearchQueryParams;
+}
+
+export type BILibraryCatalogResponse = {
+    categories: Category[];
+}
+
 export interface WorkflowDataRequest {
     workflowName: string;
     filePath: string;

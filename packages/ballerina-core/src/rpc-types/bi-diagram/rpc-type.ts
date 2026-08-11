@@ -70,6 +70,8 @@ import {
     RenameIdentifierRequest,
     BISearchRequest,
     BISearchResponse,
+    BILibraryCatalogRequest,
+    BILibraryCatalogResponse,
     GetRecordConfigRequest,
     GetRecordConfigResponse,
     UpdateRecordConfigRequest,
@@ -234,6 +236,7 @@ export const addFunction: RequestType<AddFunctionRequest, AddImportItemResponse>
 export const getFunctionNode: RequestType<FunctionNodeRequest, FunctionNodeResponse> = { method: `${_preFix}/getFunctionNode` };
 export const getEndOfFile: RequestType<EndOfFileRequest, LinePosition> = { method: `${_preFix}/getEndOfFile` };
 export const search: RequestType<BISearchRequest, BISearchResponse> = { method: `${_preFix}/search` };
+export const searchLibraryCatalog: RequestType<BILibraryCatalogRequest, BILibraryCatalogResponse> = { method: `${_preFix}/searchLibraryCatalog` };
 export const getAllData: RequestType<WorkflowDataRequest, WorkflowDataResponse> = { method: `${_preFix}/getAllData` };
 export const genActivity: RequestType<GenActivityRequest, GenActivityResponse> = { method: `${_preFix}/genActivity` };
 export const analyzeActivityAction: RequestType<AnalyzeActivityActionRequest, AnalyzeActivityActionResponse> = { method: `${_preFix}/analyzeActivityAction` };

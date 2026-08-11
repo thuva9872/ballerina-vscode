@@ -56,6 +56,8 @@ import {
     BISearchNodesResponse,
     BISearchRequest,
     BISearchResponse,
+    BILibraryCatalogRequest,
+    BILibraryCatalogResponse,
     GenActivityRequest,
     GenActivityResponse,
     AnalyzeActivityActionRequest,
@@ -2291,6 +2293,17 @@ export class BiDiagramRpcManager implements BIDiagramAPI {
                 resolve(res);
             }).catch((error) => {
                 console.log(">>> error searching", error);
+                reject(error);
+            });
+        });
+    }
+
+    async searchLibraryCatalog(params: BILibraryCatalogRequest): Promise<BILibraryCatalogResponse> {
+        return new Promise((resolve, reject) => {
+            StateMachine.langClient().searchLibraryCatalog(params).then((res) => {
+                resolve(res);
+            }).catch((error) => {
+                console.log(">>> error searching library catalog", error);
                 reject(error);
             });
         });

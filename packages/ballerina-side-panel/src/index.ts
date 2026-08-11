@@ -30,6 +30,7 @@ export * from "./components/editors";
 export * from "./components/GroupList";
 export * from "./components/ParamManager/ParamManager";
 export * from "./components/CardList";
+export * from "./components/FunctionsPanel";
 export * from "./components/Skeletons";
 export * from "./context";
 

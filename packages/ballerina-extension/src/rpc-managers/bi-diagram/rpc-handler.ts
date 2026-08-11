@@ -48,6 +48,7 @@ import {
     BINodeTemplateRequest,
     BISearchNodesRequest,
     BISearchRequest,
+    BILibraryCatalogRequest,
     GenActivityRequest,
     AnalyzeActivityActionRequest,
     WorkflowDataRequest,
@@ -162,6 +163,7 @@ import {
     RenameIdentifierRequest,
     runProject,
     search,
+    searchLibraryCatalog,
     searchNodes,
     ServiceClassSourceRequest,
     SignatureHelpRequest,
@@ -276,6 +278,7 @@ export function registerBiDiagramRpcHandlers(messenger: Messenger) {
     messenger.onRequest(getFunctionNode, (args: FunctionNodeRequest) => rpcManger.getFunctionNode(args));
     messenger.onRequest(getEndOfFile, (args: EndOfFileRequest) => rpcManger.getEndOfFile(args));
     messenger.onRequest(search, (args: BISearchRequest) => rpcManger.search(args));
+    messenger.onRequest(searchLibraryCatalog, (args: BILibraryCatalogRequest) => rpcManger.searchLibraryCatalog(args));
     messenger.onRequest(getAllData, (args: WorkflowDataRequest) => rpcManger.getAllData(args));
     messenger.onRequest(genActivity, (args: GenActivityRequest) => rpcManger.genActivity(args));
     messenger.onRequest(analyzeActivityAction, (args: AnalyzeActivityActionRequest) => rpcManger.analyzeActivityAction(args));

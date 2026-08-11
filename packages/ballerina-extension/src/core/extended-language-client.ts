@@ -203,6 +203,8 @@ import {
     AINodesRequest,
     BISearchRequest,
     BISearchResponse,
+    BILibraryCatalogRequest,
+    BILibraryCatalogResponse,
     GenActivityRequest,
     GenActivityResponse,
     AnalyzeActivityActionRequest,
@@ -510,6 +512,7 @@ enum EXTENDED_APIS {
     BI_WORKFLOW_GEN_ACTIVITY = 'workflowManager/genActivity',
     BI_WORKFLOW_ANALYZE_ACTIVITY_ACTION = 'workflowManager/analyzeActivityAction',
     BI_SEARCH = 'flowDesignService/search',
+    BI_SEARCH_LIBRARY_CATALOG = 'flowDesignService/searchLibraryCatalog',
     BI_SEARCH_NODES = 'flowDesignService/searchNodes',
     OPEN_API_GENERATE_CLIENT = 'openAPIService/genClient',
     OPEN_API_GENERATED_MODULES = 'openAPIService/getModules',
@@ -1561,6 +1564,10 @@ export class ExtendedLangClient extends LanguageClient implements ExtendedLangCl
 
     async search(params: BISearchRequest): Promise<BISearchResponse> {
         return this.sendRequest<BISearchResponse>(EXTENDED_APIS.BI_SEARCH, params);
+    }
+
+    async searchLibraryCatalog(params: BILibraryCatalogRequest): Promise<BILibraryCatalogResponse> {
+        return this.sendRequest<BILibraryCatalogResponse>(EXTENDED_APIS.BI_SEARCH_LIBRARY_CATALOG, params);
     }
 
     async getAllData(params: WorkflowDataRequest): Promise<WorkflowDataResponse> {

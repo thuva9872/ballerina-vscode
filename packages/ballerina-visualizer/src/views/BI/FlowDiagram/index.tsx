@@ -47,6 +47,7 @@ import {
     SearchKind,
     EditorConfig,
     CodeData,
+    functionKinds,
     JoinProjectPathRequest,
     CodeContext,
     AIPanelPrompt,
@@ -68,12 +69,13 @@ import {
     enrichCategoryWithDevant,
     convertKnowledgeBaseCategoriesToSidePanelCategories
 } from "../../../utils/bi";
-import { findCurrentIntegrationCategory } from "../../../utils/function-category";
+import { findCurrentIntegrationCategory, splitFunctionPanelCategories } from "../../../utils/function-category";
 import { useDraftNodeManager } from "./hooks/useDraftNodeManager";
 import { NodePosition, STNode } from "@wso2/syntax-tree";
 import { View, ProgressIndicator, ThemeColors } from "@wso2/ui-toolkit";
 import { applyModifications, textToModifications } from "../../../utils/utils";
 import { PanelManager, SidePanelView } from "./PanelManager";
+import { AddLibraryPopup } from "./AddLibraryPopup";
 import { transformCategories, getNodeTemplateForConnection, findFunctionByName } from "./utils";
 import { PanelOverlayProvider } from "./context/PanelOverlayContext";
 import { PanelOverlayRenderer } from "./PanelOverlayRenderer";
@@ -156,6 +158,8 @@ export function BIFlowDiagram(props: BIFlowDiagramProps) {
     const [expandedGroupId, setExpandedGroupId] = useState<string | null>(null);
     const [fetchingAiSuggestions, setFetchingAiSuggestions] = useState(false);
     const [showProgressIndicator, setShowProgressIndicator] = useState(false);
+    // Controls the centered "Add library" browse popup (mirrors the Add Connection modal).
+    const [showAddLibrary, setShowAddLibrary] = useState(false);
     const [showProgressSpinner, setShowProgressSpinner] = useState<boolean>(false);
     const [progressMessage, setProgressMessage] = useState<string>(LOADING_MESSAGE);
     const [progressTitle, setProgressTitle] = useState<string>("");
@@ -309,6 +313,66 @@ export function BIFlowDiagram(props: BIFlowDiagramProps) {
     const enrichedCategories = useMemo(() => {
         return enrichCategoryWithDevant(platformExtState?.devantConns?.list, categories, importingConn)
     }, [platformExtState, categories, importingConn])
+
+    // Split the FUNCTION search categories into the two groups the redesigned Functions panel renders.
+    const { withinProject: functionWithinProject, imported: functionImported } = useMemo(
+        () => splitFunctionPanelCategories(categories),
+        [categories]
+    );
+
+    // Opens the config form for a catalog function via the existing node-template path.
+    const openLibraryFunctionForm = (codedata: CodeData) => {
+        pushToNavigationStack(sidePanelView, categories, selectedNodeRef.current, selectedClientName.current);
+        setShowProgressIndicator(true);
+        rpcClient
+            .getBIDiagramRpcClient()
+            .getNodeTemplate({ position: targetRef.current.startLine, filePath: model?.fileName, id: codedata })
+            .then((response: any) => {
+                if (response.errorMsg) {
+                    showConnectorError(response.errorMsg);
+                    return;
+                }
+                selectedNodeRef.current = response.flowNode;
+                nodeTemplateRef.current = response.flowNode;
+                showEditForm.current = false;
+                setSidePanelView(SidePanelView.FORM);
+                setShowSidePanel(true);
+            })
+            .catch((error) => {
+                console.error(">>> getNodeTemplate failed", error, codedata);
+                showConnectorError();
+            })
+            .finally(() => setShowProgressIndicator(false));
+    };
+
+    // A catalog function was picked in the Add library popup: already-imported -> open form directly;
+    // otherwise import the module first, then open the form.
+    const handleSelectLibraryFunction = (node: AvailableNode, imported: boolean) => {
+        const codedata = node?.codedata as CodeData | undefined;
+        if (!codedata) {
+            return;
+        }
+        setShowAddLibrary(false);
+        if (imported) {
+            openLibraryFunctionForm(codedata);
+            return;
+        }
+        setShowProgressIndicator(true);
+        rpcClient
+            .getBIDiagramRpcClient()
+            .addFunction({ filePath: model?.fileName, codedata, kind: functionKinds.AVAILABLE, searchKind: "FUNCTION" })
+            .then(() => openLibraryFunctionForm(codedata))
+            .catch((error) => {
+                console.error(">>> addFunction failed", error, codedata);
+                showConnectorError();
+            })
+            .finally(() => setShowProgressIndicator(false));
+    };
+
+    // Opens the "Add library" browse popup (centered modal, matching the Add Connection experience).
+    const openLibraryCatalog = () => {
+        setShowAddLibrary(true);
+    };
 
     const handleClickImportDevantConn = (data: ConnectionListItem) => {
         rpcClient.getVisualizerRpcClient().openView({
@@ -4061,6 +4125,9 @@ export function BIFlowDiagram(props: BIFlowDiagramProps) {
                 // Add node callbacks
                 onAddConnection={handleOnAddConnection}
                 onAddFunction={handleOnAddFunction}
+                onAddLibrary={openLibraryCatalog}
+                functionWithinProject={functionWithinProject}
+                functionImported={functionImported}
                 onAddWorkflow={handleOnAddWorkflow}
                 onAddActivity={handleOnAddActivity}
                 onAddActivityFromConnection={handleOnAddActivityFromConnection}
@@ -4127,6 +4194,16 @@ export function BIFlowDiagram(props: BIFlowDiagramProps) {
                             setShowAddAgentPopup(false);
                             loadAvailableAgents();
                         }}
+                    />
+                </AddAgentPopupLayer>
+            )}
+
+            {showAddLibrary && (
+                <AddAgentPopupLayer>
+                    <AddLibraryPopup
+                        filePath={model?.fileName}
+                        onSelectFunction={handleSelectLibraryFunction}
+                        onClose={() => setShowAddLibrary(false)}
                     />
                 </AddAgentPopupLayer>
             )}

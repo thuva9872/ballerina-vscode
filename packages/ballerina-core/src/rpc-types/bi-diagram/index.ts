@@ -69,6 +69,8 @@ import {
     RenameIdentifierRequest,
     BISearchRequest,
     BISearchResponse,
+    BILibraryCatalogRequest,
+    BILibraryCatalogResponse,
     GetRecordConfigRequest,
     GetRecordConfigResponse,
     UpdateRecordConfigRequest,
@@ -231,6 +233,7 @@ export interface BIDiagramAPI {
     getFunctionNode: (params: FunctionNodeRequest) => Promise<FunctionNodeResponse>;
     getEndOfFile: (params: EndOfFileRequest) => Promise<LinePosition>;
     search: (params: BISearchRequest) => Promise<BISearchResponse>;
+    searchLibraryCatalog: (params: BILibraryCatalogRequest) => Promise<BILibraryCatalogResponse>;
     getAllData: (params: WorkflowDataRequest) => Promise<WorkflowDataResponse>;
     genActivity: (params: GenActivityRequest) => Promise<GenActivityResponse>;
     analyzeActivityAction: (params: AnalyzeActivityActionRequest) => Promise<AnalyzeActivityActionResponse>;

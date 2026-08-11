@@ -37,8 +37,10 @@ import io.ballerina.flowmodelgenerator.core.SourceGenerator;
 import io.ballerina.flowmodelgenerator.core.SuggestedComponentService;
 import io.ballerina.flowmodelgenerator.core.SuggestedModelGenerator;
 import io.ballerina.flowmodelgenerator.core.analyzers.function.ModuleNodeAnalyzer;
+import io.ballerina.flowmodelgenerator.core.catalog.MockCentral;
 import io.ballerina.flowmodelgenerator.core.diagnostics.DiagnosticRequest;
 import io.ballerina.flowmodelgenerator.core.diagnostics.DiagnosticsDebouncer;
+import io.ballerina.flowmodelgenerator.core.model.Category;
 import io.ballerina.flowmodelgenerator.core.model.FlowNode;
 import io.ballerina.flowmodelgenerator.core.search.SearchCommand;
 import io.ballerina.flowmodelgenerator.core.utils.FileSystemUtils;
@@ -55,6 +57,7 @@ import io.ballerina.flowmodelgenerator.extension.request.FlowModelSourceGenerato
 import io.ballerina.flowmodelgenerator.extension.request.FlowModelSuggestedGenerationRequest;
 import io.ballerina.flowmodelgenerator.extension.request.FlowNodeDeleteRequest;
 import io.ballerina.flowmodelgenerator.extension.request.FunctionDefinitionRequest;
+import io.ballerina.flowmodelgenerator.extension.request.LibraryCatalogRequest;
 import io.ballerina.flowmodelgenerator.extension.request.SaveClassMemberRequest;
 import io.ballerina.flowmodelgenerator.extension.request.SearchNodesRequest;
 import io.ballerina.flowmodelgenerator.extension.request.SearchRequest;
@@ -76,6 +79,7 @@ import io.ballerina.modelgenerator.commons.PackageUtil;
 import io.ballerina.projects.Document;
 import io.ballerina.projects.DocumentId;
 import io.ballerina.projects.Module;
+import io.ballerina.projects.Package;
 import io.ballerina.projects.Project;
 import io.ballerina.projects.ProjectKind;
 import io.ballerina.tools.text.LinePosition;
@@ -713,6 +717,33 @@ public class FlowModelGeneratorService implements ExtendedLanguageServerService 
                 Gson gson = new Gson();
                 JsonElement jsonElement = gson.toJsonTree(nodes);
                 response.setOutput(jsonElement.getAsJsonArray());
+            } catch (Throwable e) {
+                response.setError(e);
+            }
+            return response;
+        });
+    }
+
+    @JsonRequest
+    public CompletableFuture<FlowModelAvailableNodesResponse> searchLibraryCatalog(LibraryCatalogRequest request) {
+        return CompletableFuture.supplyAsync(() -> {
+            FlowModelAvailableNodesResponse response = new FlowModelAvailableNodesResponse();
+            try {
+                Path filePath = Path.of(request.filePath());
+                WorkspaceManager workspaceManager = this.workspaceManagerProxy.get();
+                Project project = workspaceManager.loadProject(filePath);
+                Package currentPackage = project.currentPackage();
+                PackageUtil.getCompilation(currentPackage);
+                List<String> importedModules = currentPackage.getDefaultModule().moduleDependencies().stream()
+                        .map(moduleDependency -> moduleDependency.descriptor().name().packageName().value())
+                        .toList();
+
+                Map<String, String> queryMap = request.queryMap();
+                String query = queryMap == null ? "" : queryMap.getOrDefault("q", "");
+                String source = request.source() == null ? MockCentral.SOURCE_ALL : request.source();
+
+                List<Category> categories = MockCentral.getInstance().getCatalog(source, query, importedModules);
+                response.setCategories(new Gson().toJsonTree(categories).getAsJsonArray());
             } catch (Throwable e) {
                 response.setError(e);
             }

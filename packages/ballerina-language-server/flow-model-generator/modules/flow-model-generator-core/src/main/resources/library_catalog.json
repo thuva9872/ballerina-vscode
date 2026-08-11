@@ -1,0 +1,5 @@
+{
+  "ballerina": ["io", "log", "time", "uuid", "file", "crypto", "url", "os"],
+  "organization": ["financial.iso8583", "cdc", "health.hl7v2"],
+  "community": ["mime", "random", "data.jsondata", "data.xmldata"]
+}

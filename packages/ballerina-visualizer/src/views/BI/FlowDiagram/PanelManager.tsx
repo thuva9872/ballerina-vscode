@@ -18,7 +18,7 @@
 
 import { useEffect, useRef } from "react";
 import { Button, ThemeColors, Typography } from "@wso2/ui-toolkit";
-import { PanelContainer, NodeList, CardList, ExpressionFormField } from "@wso2/ballerina-side-panel";
+import { PanelContainer, NodeList, CardList, ExpressionFormField, FunctionsPanel } from "@wso2/ballerina-side-panel";
 import {
     FlowNode,
     LineRange,
@@ -120,6 +120,9 @@ interface PanelManagerProps {
     onSelectNode: (nodeId: string, metadata?: any) => void;
     onAddConnection?: () => void;
     onAddFunction?: () => void;
+    onAddLibrary?: () => void;
+    functionWithinProject?: any[];
+    functionImported?: any[];
     onAddWorkflow?: () => void;
     onAddActivity?: () => void;
     onAddActivityFromConnection?: () => void;
@@ -197,6 +200,9 @@ export function PanelManager(props: PanelManagerProps) {
         onSelectNode,
         onAddConnection,
         onAddFunction,
+        onAddLibrary,
+        functionWithinProject,
+        functionImported,
         onAddWorkflow,
         onAddActivity,
         onAddActivityFromConnection,
@@ -278,15 +284,14 @@ export function PanelManager(props: PanelManagerProps) {
 
             case SidePanelView.FUNCTION_LIST:
                 return (
-                    <NodeList
-                        categories={categories}
+                    <FunctionsPanel
+                        withinProject={functionWithinProject ?? []}
+                        imported={functionImported ?? []}
                         onSelect={onSelectNode}
-                        onSearchTextChange={(searchText) => onSearchFunction?.(searchText, FUNCTION_TYPE.REGULAR)}
-                        onAddFunction={onAddFunction}
+                        onAddLibrary={onAddLibrary}
                         onClose={onClose}
                         title={"Functions"}
                         searchPlaceholder={"Search library functions"}
-                        searchText={searchText}
                         onBack={canGoBack ? onBack : undefined}
                     />
                 );

@@ -56,6 +56,42 @@ function normalizeFunctionSearchCategory(category: Category): Category {
     };
 }
 
+// Titles emitted by the FUNCTION search (see Category.Name in the language server).
+export const STANDARD_LIBRARY_CATEGORY_TITLE = "Standard Library";
+export const IMPORTED_FUNCTIONS_CATEGORY_TITLE = "Imported Functions";
+
+// The "Standard Library" category holds functions that are available but NOT yet imported into
+// the project. The redesigned Functions panel shows only in-project functions, so this is excluded.
+export function isAvailableLibraryCategory(category: PanelCategory): boolean {
+    return category?.title === STANDARD_LIBRARY_CATEGORY_TITLE;
+}
+
+/**
+ * Split the side-panel function categories into the two groups the redesigned Functions panel
+ * renders: "Within Project" (current integration + workspace packages) and "Imported Functions"
+ * (already-added dependency modules). The not-yet-imported "Standard Library" category is dropped
+ * (those are browsed via the Add library modal instead). Classification is title-based so a drift
+ * on the imported side still falls through to "Within Project" rather than being lost.
+ */
+export function splitFunctionPanelCategories(categories: PanelCategory[]): {
+    withinProject: PanelCategory[];
+    imported: PanelCategory[];
+} {
+    const withinProject: PanelCategory[] = [];
+    const imported: PanelCategory[] = [];
+    for (const category of categories ?? []) {
+        if (!category || isAvailableLibraryCategory(category)) {
+            continue;
+        }
+        if (category.title === IMPORTED_FUNCTIONS_CATEGORY_TITLE) {
+            imported.push(category);
+        } else {
+            withinProject.push(category);
+        }
+    }
+    return { withinProject, imported };
+}
+
 export function findCurrentIntegrationCategory(categories: PanelCategory[]): PanelCategory | undefined {
     for (const category of categories) {
         if (category.title === CURRENT_INTEGRATION_CATEGORY_TITLE

@@ -53,6 +53,8 @@ import {
     BISearchNodesResponse,
     BISearchRequest,
     BISearchResponse,
+    BILibraryCatalogRequest,
+    BILibraryCatalogResponse,
     GenActivityRequest,
     GenActivityResponse,
     AnalyzeActivityActionRequest,
@@ -231,6 +233,7 @@ import {
     renameIdentifier,
     runProject,
     search,
+    searchLibraryCatalog,
     genActivity,
     analyzeActivityAction,
     getAllData,
@@ -582,6 +585,10 @@ export class BiDiagramRpcClient implements BIDiagramAPI {
 
     search(params: BISearchRequest): Promise<BISearchResponse> {
         return this._messenger.sendRequest(search, HOST_EXTENSION, params);
+    }
+
+    searchLibraryCatalog(params: BILibraryCatalogRequest): Promise<BILibraryCatalogResponse> {
+        return this._messenger.sendRequest(searchLibraryCatalog, HOST_EXTENSION, params);
     }
 
     getAllData(params: WorkflowDataRequest): Promise<WorkflowDataResponse> {
