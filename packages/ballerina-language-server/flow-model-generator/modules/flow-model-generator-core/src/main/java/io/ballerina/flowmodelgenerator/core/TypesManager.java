@@ -1055,11 +1055,11 @@ public class TypesManager {
     }
 
     private static String getImportStmt(String org, String module) {
-        return String.format("%nimport %s/%s;%n", org, module);
+        return String.format("%nimport %s/%s;%n", org, CommonUtils.escapeModuleName(module));
     }
 
     private static String getImportStmt(String module) {
-        return String.format("%nimport %s;%n", module);
+        return String.format("%nimport %s;%n", CommonUtils.escapeModuleName(module));
     }
 
     private static Map<String, String> getImports(String importsStatements) {

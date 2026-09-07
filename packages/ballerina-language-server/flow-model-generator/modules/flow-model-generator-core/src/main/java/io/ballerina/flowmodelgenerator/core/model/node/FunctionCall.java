@@ -26,6 +26,7 @@ import io.ballerina.flowmodelgenerator.core.model.NodeKind;
 import io.ballerina.flowmodelgenerator.core.model.Property;
 import io.ballerina.flowmodelgenerator.core.model.SourceBuilder;
 import io.ballerina.flowmodelgenerator.core.utils.FlowNodeUtil;
+import io.ballerina.modelgenerator.commons.CommonUtils;
 import io.ballerina.modelgenerator.commons.FunctionData;
 import io.ballerina.modelgenerator.commons.PackageUtil;
 import org.eclipse.lsp4j.TextEdit;
@@ -74,7 +75,8 @@ public class FunctionCall extends CallBuilder {
         }
 
         String module = flowNode.codedata().module();
-        String methodCallPrefix = (module != null) ? module.substring(module.lastIndexOf('.') + 1) + ":" : "";
+        String methodCallPrefix =
+                (module != null) ? CommonUtils.escapeModulePrefix(flowNode.codedata().org(), module) + ":" : "";
         String methodCall = methodCallPrefix + flowNode.metadata().label();
 
         return sourceBuilder.token()

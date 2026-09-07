@@ -308,7 +308,8 @@ public final class AmbiguousTypeCastResolver {
         if (CommonUtils.importExists(document.syntaxTree().rootNode(), org, module)) {
             return "";
         }
-        return "import " + CommonUtils.getImportStatement(org, module, module) + ";" + System.lineSeparator();
+        return "import " + CommonUtils.escapeImportStatement(CommonUtils.getImportStatement(org, module, module))
+                + ";" + System.lineSeparator();
     }
 
     /**

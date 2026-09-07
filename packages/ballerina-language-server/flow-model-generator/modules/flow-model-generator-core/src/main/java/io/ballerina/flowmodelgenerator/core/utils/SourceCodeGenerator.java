@@ -173,7 +173,8 @@ public class SourceCodeGenerator {
 
     private String generateTypeDescriptor(Object typeDescriptor) {
         if (typeDescriptor instanceof String) { // Type reference or in-line type as string
-            return (String) typeDescriptor;
+            // Escape reserved-keyword module qualifiers for source emission.
+            return CommonUtils.escapeTypeSignatureModulePrefixes((String) typeDescriptor);
         }
 
         TypeData typeData = toTypeData(typeDescriptor);
@@ -215,7 +216,7 @@ public class SourceCodeGenerator {
             typeData.includes().forEach(include -> inclusionsBuilder
                     .append(LS)
                     .append("\t*")
-                    .append(include)
+                    .append(CommonUtils.escapeTypeSignatureModulePrefixes(include))
                     .append(";"));
         }
 

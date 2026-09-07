@@ -91,7 +91,8 @@ public class ModelProviderBuilder extends CallBuilder {
 
     private static String methodCallWithModulePrefix(SourceBuilder sourceBuilder) {
         String module = sourceBuilder.flowNode.codedata().module();
-        String methodCallPrefix = (module != null) ? module.substring(module.lastIndexOf('.') + 1) + ":" : "";
+        String methodCallPrefix = (module != null)
+                ? CommonUtils.escapeModulePrefix(sourceBuilder.flowNode.codedata().org(), module) + ":" : "";
         return methodCallPrefix + GET_DEFAULT_MODEL_PROVIDER_FUNCTION_NAME;
     }
 

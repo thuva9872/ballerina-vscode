@@ -292,7 +292,11 @@ public class ExpressionEditorService implements ExtendedLanguageServerService {
         Optional<TextEdit> importTextEdit = expressionEditorContext.getImport(importStatement);
         importTextEdit.ifPresent(textEdit ->
                 PackageUtil.pullModuleAndNotify(lsClientLogger, ModuleInfo.from(moduleId)));
-        response.setPrefix(CommonUtils.getPackageName(importStatement));
+        // The prefix is used by the client to reference the module in source, so escape reserved-keyword modules.
+        String[] moduleParts = importStatement.split("/");
+        String prefixOrg = moduleParts.length > 1 ? moduleParts[0] : "";
+        String prefixModule = CommonUtils.unescapeModuleName(moduleParts[moduleParts.length - 1].split(":")[0]);
+        response.setPrefix(CommonUtils.escapeModulePrefix(prefixOrg, prefixModule));
         response.setModuleId(moduleId);
     }
 }

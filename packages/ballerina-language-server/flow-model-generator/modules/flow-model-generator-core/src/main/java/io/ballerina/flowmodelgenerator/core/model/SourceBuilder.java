@@ -25,7 +25,6 @@ import io.ballerina.compiler.api.symbols.TypeDefinitionSymbol;
 import io.ballerina.compiler.api.symbols.TypeDescKind;
 import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
 import io.ballerina.compiler.api.symbols.TypeSymbol;
-import io.ballerina.compiler.syntax.tree.IdentifierToken;
 import io.ballerina.compiler.syntax.tree.ImportDeclarationNode;
 import io.ballerina.compiler.syntax.tree.ModulePartNode;
 import io.ballerina.compiler.syntax.tree.Node;
@@ -840,8 +839,10 @@ public class SourceBuilder {
     private void removeExistingImports(SyntaxTree syntaxTree) {
         ModulePartNode rootNode = syntaxTree.rootNode();
         for (ImportDeclarationNode existingImport : rootNode.imports()) {
+            // Import identifier tokens carry the escape quote for reserved-keyword segments; normalize back to
+            // the raw form so it matches the (raw) entries held in the imports set.
             String moduleName = existingImport.moduleName().stream()
-                    .map(IdentifierToken::text)
+                    .map(token -> CommonUtil.unescapeReservedKeyword(token.text()))
                     .collect(Collectors.joining("."));
             String orgName = existingImport.orgName().map(org -> org.orgName().text() + "/").orElse("");
             imports.remove(orgName + moduleName);
@@ -852,7 +853,7 @@ public class SourceBuilder {
         for (String moduleImport : imports) {
             tokenBuilder
                     .keyword(SyntaxKind.IMPORT_KEYWORD)
-                    .name(moduleImport)
+                    .name(CommonUtils.escapeImportStatement(moduleImport))
                     .endOfStatement();
             textEdit(SourceKind.IMPORT, filePath, startLineRange);
         }
@@ -979,12 +980,14 @@ public class SourceBuilder {
         }
 
         public TokenBuilder expressionWithType(Property type, Property variable) {
-            sb.append(type.toSourceCode()).append(WHITE_SPACE).append(variable.toSourceCode()).append(WHITE_SPACE);
+            sb.append(CommonUtils.escapeTypeSignatureModulePrefixes(type.toSourceCode())).append(WHITE_SPACE)
+                    .append(variable.toSourceCode()).append(WHITE_SPACE);
             return this;
         }
 
         public TokenBuilder expressionWithType(String type, Property variable) {
-            sb.append(type).append(WHITE_SPACE).append(variable.toSourceCode()).append(WHITE_SPACE);
+            sb.append(CommonUtils.escapeTypeSignatureModulePrefixes(type)).append(WHITE_SPACE)
+                    .append(variable.toSourceCode()).append(WHITE_SPACE);
             return this;
         }
 

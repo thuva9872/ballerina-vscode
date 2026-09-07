@@ -1199,7 +1199,7 @@ public class ActivityCallBuilder extends CallBuilder {
             return functionSymbol;
         }
 
-        String modulePrefix = module.substring(module.lastIndexOf('.') + 1);
+        String modulePrefix = CommonUtils.escapeModulePrefix(org, module);
         sourceBuilder.acceptImport(org, module);
         return modulePrefix + ":" + functionSymbol;
     }
